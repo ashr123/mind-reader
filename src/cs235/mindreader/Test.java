@@ -1,45 +1,63 @@
 package cs235.mindreader;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
-public class Test {
+public class Test
+{
 
-	public static void main(String[] args) throws FileNotFoundException {
+	public static void main(String[] args) throws IOException
+	{
 
 		MindReader mindReader = Factory.createMindReader();
-		try {
+		try
+		{
 			mindReader.loadPlayerProfile(null);
-		} catch (IllegalArgumentException e) {
+		}
+		catch (IllegalArgumentException e)
+		{
 			System.out.println("File cannot be null");
 		}
 		mindReader.loadPlayerProfile("NonExistentFileName");
 
 		makeChoices(mindReader);
-		try {
+		try
+		{
 			mindReader.makeChoice("nothing");
-		} catch (IllegalArgumentException e) {
+		}
+		catch (IllegalArgumentException e)
+		{
 			System.out.println("Can only be heads or tails");
 		}
 		mindReader.getPrediction();
 		mindReader.getMindReaderScore();
 		mindReader.getPlayerScore();
-		try {
+		try
+		{
 			mindReader.savePlayerProfile(null);
-		} catch (IllegalArgumentException e) {
+		}
+		catch (IllegalArgumentException e)
+		{
 			System.out.println("cannot save a file as 'null'");
 		}
 		mindReader.savePlayerProfile("profile2.txt");
 		Counter c = new Counter(0, 0);
-		try {
+		try
+		{
 			c.setHeads(-1);
-		} catch (IllegalArgumentException e) {
+		}
+		catch (IllegalArgumentException e)
+		{
 			System.out.println("Heads must be set as a non-negative number");
 		}
 		c.setHeads(1);
 		c.getHeads();
-		try {
+		try
+		{
 			c.setTails(-1);
-		} catch (IllegalArgumentException e) {
+		}
+		catch (IllegalArgumentException e)
+		{
 			System.out.println("Tails must be set as a non-negative number");
 		}
 		c.setTails(1);
@@ -48,7 +66,8 @@ public class Test {
 
 	}
 
-	private static void makeChoices(MindReader mindReader) {
+	private static void makeChoices(MindReader mindReader)
+	{
 
 		mindReader.makeChoice("heads");
 		mindReader.makeChoice("tails");
@@ -56,6 +75,6 @@ public class Test {
 		mindReader.makeChoice("tails");
 		mindReader.makeChoice("heads");
 		mindReader.makeChoice("tails");
-		
+
 	}
 }

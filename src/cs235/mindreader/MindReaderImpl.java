@@ -1,195 +1,204 @@
 package cs235.mindreader;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.io.*;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
-public class MindReaderImpl implements MindReader {
-
-	private int mindReaderScore = 0;
-	private int playerScore = 0;
-	private List list = new LinkedList<String>();
-	private Map map = new HashMap();
+public class MindReaderImpl implements MindReader
+{
 
 	final static int THREE = 3;
 	final static int FOUR = 4;
 	final static int FIVE = 5;
+	private final List<String> list;
+	private final Map<List<String>, Counter> map;
+	private int mindReaderScore = 0;
+	private int playerScore = 0;
 
-	// Constructs a new MindReaderImpl Object with a map, list, and default
-	// starting scores.
-	public MindReaderImpl(Map map, List list, int mindReaderScore,
-			int playerScore) {
+	/**
+	 * Constructs a new MindReaderImpl Object with a map, list, and default starting scores.
+	 *
+	 * @param map
+	 * @param list
+	 * @param mindReaderScore
+	 * @param playerScore
+	 */
+	public MindReaderImpl(Map<List<String>, Counter> map, List<String> list, int mindReaderScore,
+	                      int playerScore)
+	{
 		this.map = map;
 		this.list = list;
-		this.mindReaderScore = 0;
-		this.playerScore = 0;
+		this.mindReaderScore = mindReaderScore;
+		this.playerScore = playerScore;
 	}
 
-	// Saves the player's current list of choices in a file called "profile.txt"
-	// This is formatted with a list of 4 choice sequences followed by the
-	// player's choices of heads or tails
-	public boolean savePlayerProfile(String filename) {
-		if (filename == null) {
-			throw new IllegalArgumentException();
-		}
-		try {
-			PrintWriter out = new PrintWriter(new FileWriter(filename));
-			out.print(map.size() + "\n");
-			Iterator it = map.keySet().iterator();
-			while (it.hasNext()) {
-				String line = "";
-				List tempList2 = (List) it.next();
-				Counter c = (Counter) map.get(tempList2);
-				String counter = c.getHeads() + " " + c.getTails();
-				for (int i = 0; i < tempList2.size(); i++) {
-					line += tempList2.get(i) + " ";
-				}
-				out.println(line + counter);
+	/**
+	 * Saves the player's current list of choices in a file called "profile.txt".<br>
+	 * This is formatted with a list of 4 choice sequences followed by the player's choices of heads or tails
+	 *
+	 * @param filename the name of the file in which to store the profile
+	 * @return
+	 */
+	public boolean savePlayerProfile(String filename) throws IOException
+	{
+		try (PrintWriter out = new PrintWriter(new FileWriter(filename)))
+		{
+			final StringBuilder line = new StringBuilder().append(map.size()).append('\n');
+			for (List<String> strings : map.keySet())
+			{
+				for (String s : strings)
+					line.append(s).append(" ");
+				Counter c = map.get(strings);
+				line.append(c.getHeads()).append(' ').append(c.getTails()).append('\n');
 			}
-			out.close();
-			System.out.println("File saved successfully");
-			return true;
-
-		} catch (IllegalArgumentException e) {
-			System.out.println("File name cannot be null");
-		} catch (IOException e) {
-			System.out.println("Could not save file. Please verify path");
+			out.print(line);
 		}
-		return false;
+		System.out.println("File saved successfully");
+		return true;
 	}
 
-	// Loads the player's "profile.txt" file and updates the map with it
-	public boolean loadPlayerProfile(String filename) {
-		if (filename == null) {
-			throw new IllegalArgumentException();
-		}
+	/**
+	 * Loads the player's "profile.txt" file and updates the map with it
+	 *
+	 * @param filename the name of the file to be loaded
+	 * @return
+	 */
+	public boolean loadPlayerProfile(String filename) throws FileNotFoundException
+	{
 		File file = new File(filename);
-		int numLines = 0;
-		try {
-			Scanner in = new Scanner(file);
+		int numLines;
+		try (Scanner in = new Scanner(file))
+		{
 			if (in.hasNext())
 				numLines = Integer.parseInt(in.nextLine());
 			else
 				return false;
 
-			for (int i = 0; i < numLines; i++) {
-				List tempList = new LinkedList();
+			for (int i = 0; i < numLines; i++)
+			{
+				List<String> tempList = new LinkedList<>();
 				tempList.add(in.next());
 				tempList.add(in.next());
 				tempList.add(in.next());
 				tempList.add(in.next());
-				Counter c = new Counter(in.nextInt(), in.nextInt());
-				map.put(tempList, c);
+				map.put(tempList, new Counter(in.nextInt(), in.nextInt()));
 			}
 			return true;
-		} catch (FileNotFoundException e) {
-			System.out.println("File was not found!");
-			return false;
-		} catch (NullPointerException e) {
-			System.out.println("Cannot be null for file");
-			return false;
 		}
 	}
 
-	// Ensures only tails and heads as choices. Also compares the player's
-	// choice with the mindreader's prediction and increments the appropriate
-	// score
-	public void makeChoice(String choice) {
-		if (choice.equals("heads") || choice.equals("tails")) {
-			if (choice.equals(getPrediction())) {
+	/**
+	 * Ensures only tails and heads as choices. Also compares the player's
+	 * choice with the mindreader's prediction and increments the appropriate score
+	 *
+	 * @param choice the string "heads" if the choice is heads,
+	 *               or the string "tails" if the choice is tails
+	 */
+	public void makeChoice(String choice)
+	{
+		if (choice.equals("heads") || choice.equals("tails"))
+			if (choice.equals(getPrediction()))
 				mindReaderScore++;
-			} else {
+			else
 				playerScore++;
-			}
-		}
-
-		else {
+		else
 			throw new IllegalArgumentException("can be 'heads' or 'tails' only");
-		}
 
-		if (choice.equals("heads")) {
+		if (choice.equals("heads"))
 			list.add("heads");
-		}
-		if (choice.equals("tails")) {
+		if (choice.equals("tails"))
 			list.add("tails");
-		}
-		addEntry(list, map);
+		addEntry();
 	}
 
-	// If the list is 5 elements long, this calls entryDetermination and removes
-	// the last element of the list
-	public List addEntry(List list2, Map map) {
-		if (list2.size() != FIVE) {
+	/**
+	 * If the list is 5 elements long, this calls entryDetermination and removes the last element of the list
+	 *
+	 * @return
+	 */
+	public List<String> addEntry()
+	{
+		if (list.size() != FIVE)
 			return null;
-		} else {
-			List newList = new LinkedList(list2);
+		else
+		{
+			List<String> newList = new LinkedList<>(list);
 			newList.remove(FOUR);
 
-			entryDetermination(map, list2, newList);
+			entryDetermination(newList);
 		}
-		list2.remove(0);
-		return list2;
+		list.remove(0);
+		return list;
 	}
 
-	// Determines wether to increment an existing counter for a list or create
-	// a new entry in the map
-	public void entryDetermination(Map map2, List list2, List newList) {
-
+	/**
+	 * Determines wether to increment an existing counter for a list or create a new entry in the map
+	 *
+	 * @param newList
+	 */
+	public void entryDetermination(List<String> newList)
+	{
 		// If the map already contains the key, increment the correct
 		// counter
-		if (map.containsKey(newList)) {
-			Counter tempCounter = (Counter) map.get(newList);
-			if (list2.get(FOUR).equals("heads")) {
+		if (map.containsKey(newList))
+		{
+			Counter tempCounter = map.get(newList);
+			if (list.get(FOUR).equals("heads"))
 				tempCounter.setHeads(tempCounter.getHeads() + 1);
-			} else {
+			else
 				tempCounter.setTails(tempCounter.getTails() + 1);
-			}
 			map.put(newList, tempCounter);
 		}
 
 		// If the map doesn't contain the key, create a new one with
 		// associated value (counter)
-		else {
+		else
+		{
 			Counter counter = new Counter(0, 0);
-			if (list2.get(FOUR).equals("heads")) {
+			if (list.get(FOUR).equals("heads"))
 				counter.setHeads(1);
-			} else {
+			else
 				counter.setTails(1);
-			}
 			map.put(newList, counter);
 		}
 	}
 
-	// If the player's choice sequence is stored in the map and if the tails
-	// counter is greater than the heads counter for that sequence, predict
-	// tails
-	// Otherwise predict heads
-	public String getPrediction() {
-		if (map.containsKey(list)) {
-			Counter tempCounter = (Counter) (map.get(list));
-			if (tempCounter.getTails() > tempCounter.getHeads()) {
+	/**
+	 * If the player's choice sequence is stored in the map and if the tails counter is greater than the heads counter
+	 * for that sequence, predict tails Otherwise predict heads
+	 *
+	 * @return
+	 */
+	public String getPrediction()
+	{
+		if (map.containsKey(list))
+		{
+			Counter tempCounter = map.get(list);
+			if (tempCounter.getTails() > tempCounter.getHeads())
 				return "tails";
-			}
 		}
 		return "heads";
 	}
 
-	// Returns the player's score
-	public int getPlayerScore() {
+	/**
+	 * Returns the player's score
+	 *
+	 * @return
+	 */
+	public int getPlayerScore()
+	{
 		return playerScore;
 	}
 
-	// Returns the mindreader's score
-	public int getMindReaderScore() {
+	/**
+	 * Returns the mindreader's score
+	 *
+	 * @return
+	 */
+	public int getMindReaderScore()
+	{
 		return mindReaderScore;
 	}
-
 }
