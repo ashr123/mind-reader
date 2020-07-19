@@ -8,7 +8,6 @@ import java.util.Scanner;
 
 public class MindReaderImpl implements MindReader
 {
-
 	final static int THREE = 3;
 	final static int FOUR = 4;
 	final static int FIVE = 5;
@@ -49,7 +48,7 @@ public class MindReaderImpl implements MindReader
 			for (List<String> strings : map.keySet())
 			{
 				for (String s : strings)
-					line.append(s).append(" ");
+					line.append(s).append(' ');
 				Counter c = map.get(strings);
 				line.append(c.getHeads()).append(' ').append(c.getTails()).append('\n');
 			}
