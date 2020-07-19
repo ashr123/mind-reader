@@ -10,7 +10,7 @@ import java.io.IOException;
 
 public class MindReaderGUI
 {
-	public static void main(String[] params) throws FileNotFoundException
+	public static void main(String... args) throws FileNotFoundException
 	{
 		MindReader model = Factory.createMindReader();
 		model.loadPlayerProfile("profile.txt");
@@ -33,9 +33,7 @@ class View extends JFrame
 
 		this.model = model;
 
-		JPanel mainPanel;
-		mainPanel = new MainPanel();
-		setContentPane(mainPanel);
+		setContentPane(new MainPanel());
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		addWindowListener(new WindowAdapter()
